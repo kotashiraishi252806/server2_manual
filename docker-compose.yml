@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  new-php-apache:
+    build: .
+    image: php:apache
+    container_name: hackathon-php-apache
+    ports:
+      - "8084:80"  # 他と重複しないポート
+    volumes:
+      - ./html:/var/www/html  # 相対パスで新フォルダ内を参照
+
+  new-mysql:
+    image: mysql:5.7
+    container_name: hackathon-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: rootpassword
+      MYSQL_DATABASE: mydatabase
+    platform: linux/amd64
+    ports:
+      - "3307:3306"  # mysqlもポート重複回避
+    volumes:
+      - new-mysql-data:/var/lib/mysql
+
+  new-phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: hackathon-phpmyadmin
+    environment:
+      PMA_HOST: new-mysql
+      PMA_USER: root
+      PMA_PASSWORD: rootpassword
+    platform: linux/amd64
+    ports:
+      - "8085:80"  # phpmyadminのポート重複回避
+    depends_on:
+      - new-mysql
+
+volumes:
+  new-mysql-data:
